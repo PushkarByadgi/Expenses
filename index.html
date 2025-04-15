@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Expense Tracker</title>
+    <style>
+        /* Basic Minimal Styling */
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif; padding: 15px; padding-top: 50px; background: #f9f9f9; max-width: 500px; margin: 10px auto; box-sizing: border-box; position: relative; }
+        h2, h3 { text-align: center; color: #333; margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="number"], input[type="text"], input[type="url"], textarea, button { font-size: 1rem; padding: 10px 12px; margin-bottom: 12px; width: 100%; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        textarea { min-height: 60px; resize: vertical; }
+        button { background-color: #007bff; color: white; border: none; cursor: pointer; transition: background-color 0.2s ease; }
+        button:hover:not(:disabled) { background-color: #0056b3; }
+        button:active:not(:disabled) { background-color: #004085; }
+        button:disabled { background-color: #cccccc; cursor: not-allowed; }
+
+        #reset-btn { position: absolute; top: 10px; right: 10px; background-color: #dc3545; color: white; padding: 5px 10px; font-size: 0.8rem; width: auto; cursor: pointer; border: none; border-radius: 4px; }
+        #reset-btn:hover { background-color: #c82333; }
+
+        /* General Buttons with smaller widths */
+        #manage-types-btn, #save-type-changes-btn { width: auto; padding: 8px 15px; font-size: 0.9rem; margin-top: 10px; display: inline-block; margin-right: 10px;}
+        #manage-types-btn { background-color: #17a2b8; } /* Teal */
+        #manage-types-btn:hover { background-color: #138496; }
+        #save-type-changes-btn { background-color: #28a745; } /* Green */
+        #save-type-changes-btn:hover { background-color: #218838; }
+
+
+        .input-group { margin-bottom: 15px; }
+
+        /* Configuration Section Styling */
+        #config-section { padding: 20px; border: 1px solid #ccc; margin-bottom: 20px; background-color: #fff; border-radius: 5px; }
+        #save-config-btn { background-color: #28a745; margin-top: 20px; }
+        #save-config-btn:hover:not(:disabled) { background-color: #218838; }
+
+        /* Config Type Adding Styling */
+        .config-add-type-wrapper { display: flex; align-items: center; margin-bottom: 10px; }
+        .config-add-type-wrapper input { flex-grow: 1; margin-bottom: 0; }
+        #config-add-type-btn { background-color: #6c757d; width: auto; padding: 8px 15px; display: inline-block; vertical-align: middle; margin-left: 5px; margin-bottom: 0;}
+        #config-types-preview { border: 1px dashed #eee; padding: 10px; border-radius: 4px; background: #fafafa; min-height: 50px; margin-top: 15px; font-size: 0.9em; }
+        #config-types-preview span { display: inline-block; margin: 3px; padding: 3px 8px; background-color: #e0e0e0; border-radius: 10px; font-size: 0.85em; }
+
+        /* Main Screen Checkbox list styling */
+        .checkbox-list { margin-bottom: 15px; border: 1px solid #eee; padding: 10px; border-radius: 4px; background: #fff; min-height: 40px; }
+        .checkbox-list label { display: inline-block; margin: 0 10px 10px 0; background-color: #e9e9e9; padding: 5px 10px; border-radius: 15px; cursor: pointer; transition: background-color 0.2s ease; font-weight: normal; }
+        .checkbox-list label:has(input:checked) { background-color: #c8e6c9; border: 1px solid #a5d6a7; }
+        .checkbox-list input[type="checkbox"] { margin-right: 5px; width: auto; vertical-align: middle; }
+
+        /* Manage Types Section Styling */
+        #manage-types-section { padding: 20px; border: 1px solid #ccc; margin-bottom: 20px; background-color: #fff; border-radius: 5px; }
+        .manage-add-type-wrapper { display: flex; align-items: center; margin-bottom: 15px; }
+        .manage-add-type-wrapper input { flex-grow: 1; margin-bottom: 0; }
+        #manage-add-type-btn { background-color: #6c757d; width: auto; padding: 8px 15px; display: inline-block; vertical-align: middle; margin-left: 5px; margin-bottom: 0;}
+        #manage-types-list { border: 1px dashed #eee; padding: 10px; border-radius: 4px; background: #fafafa; min-height: 50px; margin-top: 10px; }
+        .type-pill-remove { /* Style for clickable types in manage list */
+             display: inline-block; margin: 4px; padding: 5px 10px; background-color: #ffc107; /* Yellow warning */
+             color: #333; border-radius: 15px; font-size: 0.9em; cursor: pointer;
+             transition: background-color 0.2s ease;
+             position: relative; padding-right: 25px; /* Space for 'x' */
+        }
+         .type-pill-remove::after { /* Add a visual 'x' for removal */
+             content: '✕'; /* Unicode multiplication sign */
+             position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+             font-weight: bold; color: #dc3545; /* Red 'x' */
+         }
+         .type-pill-remove:hover { background-color: #e0a800; } /* Darker yellow on hover */
+
+
+        /* Status Message */
+        #message { margin-top: 20px; text-align: center; font-weight: bold; font-size: 1rem; }
+        .success { color: green; }
+        .error { color: red; }
+
+        /* Visibility Control */
+        .hidden { display: none; }
+
+    </style>
+</head>
+<body>
+    <button id="reset-btn" onclick="resetApp()">Reset Configuration</button>
+
+    <!-- Configuration Section (URL and Initial Types Setup) -->
+    <div id="config-section" class="hidden">
+        <h2>Setup Expense Tracker</h2>
+        <div class="input-group">
+            <label for="script-url-input">Google Apps Script URL:</label>
+            <input type="url" id="script-url-input" placeholder="Paste your web app URL here" required>
+        </div>
+        <div class="input-group">
+            <label for="config-new-type-input">Define Initial Categories:</label>
+            <div class="config-add-type-wrapper">
+                <input type="text" id="config-new-type-input" placeholder="Enter category name">
+                <button id="config-add-type-btn" onclick="addTypeToConfig()">+ Add</button>
+            </div>
+            <label>Categories Added:</label>
+            <div id="config-types-preview"><small>No categories added yet.</small></div>
+        </div>
+        <button id="save-config-btn" onclick="saveConfiguration()">Save Configuration & Start</button>
+    </div>
+
+    <!-- Main Expense Entry Section -->
+    <div id="main-section" class="hidden">
+        <h2>Quick Expense Entry</h2>
+        <div class="input-group">
+            <label for="amount">Amount:</label>
+            <input type="number" id="amount" placeholder="e.g., 12.50" required step="0.01">
+        </div>
+        <div class="input-group">
+            <label for="description">Description:</label>
+            <textarea id="description" placeholder="e.g., Coffee" required></textarea>
+        </div>
+        <div class="input-group">
+            <label>Categories:</label>
+            <div id="checkbox-container" class="checkbox-list"></div>
+        </div>
+        <button id="submit-btn" onclick="submitExpense()">Log Expense</button>
+        <button id="manage-types-btn" onclick="showManageTypesScreen()">Manage Types</button> <!-- Button to open manage screen -->
+        <p id="message"></p>
+    </div>
+
+    <!-- Manage Types Section (Add/Remove Existing) -->
+    <div id="manage-types-section" class="hidden">
+        <h2>Manage Categories</h2>
+         <div class="input-group">
+            <label for="manage-new-type-input">Add New Category:</label>
+            <div class="manage-add-type-wrapper">
+                <input type="text" id="manage-new-type-input" placeholder="Enter category name">
+                <button id="manage-add-type-btn" onclick="addTypeInManageScreen()">+ Add</button>
+            </div>
+        </div>
+         <div class="input-group">
+             <label>Current Categories (Tap to Remove):</label>
+             <div id="manage-types-list"></div>
+         </div>
+         <button id="save-type-changes-btn" onclick="saveTypeChanges()">Save Changes & Return</button>
+    </div>
+
+
+    <script>
+        // --- Configuration Keys ---
+        const SCRIPT_URL_STORAGE_KEY = 'expenseTrackerScriptURL_v6';
+        const TYPES_STORAGE_KEY = 'expenseTrackerTypes_v6';
+
+        // --- Global Variables ---
+        let scriptURL = null;
+        const configTypes = new Set(); // Temporary types during initial config
+        let finalTypes = []; // The active list of types (Array)
+
+        // --- DOM Element Variables ---
+        let checkboxContainer, amountInput, descriptionInput, messageEl, submitBtn;
+        let configSection, mainSection, manageTypesSection; // UI Sections
+        let scriptUrlInput, configNewTypeInput, configTypesPreview; // Config elements
+        let manageNewTypeInput, manageTypesList; // Manage Types elements
+
+        // --- Functions ---
+
+        // Renders the preview list *during configuration*
+        function renderConfigPreview() {
+            if (!configTypesPreview) return;
+            configTypesPreview.innerHTML = "";
+            if (configTypes.size === 0) { configTypesPreview.innerHTML = "<small>No categories added yet.</small>"; return; }
+            const sortedConfigTypes = Array.from(configTypes).sort((a, b) => a.localeCompare(b));
+            sortedConfigTypes.forEach(type => {
+                const typeElement = document.createElement('span');
+                typeElement.textContent = type;
+                configTypesPreview.appendChild(typeElement);
+            });
+        }
+
+        // Renders the checkboxes on the *main logging screen*
+        function renderCheckboxes() {
+            if (!checkboxContainer) return;
+            checkboxContainer.innerHTML = "";
+            if (finalTypes.length === 0) { checkboxContainer.innerHTML = "<small>No categories configured. Reset or Manage Types.</small>"; return; }
+            const sortedFinalTypes = [...finalTypes].sort((a, b) => a.localeCompare(b));
+            sortedFinalTypes.forEach(type => {
+                const label = document.createElement("label");
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox"; checkbox.value = type; checkbox.id = `type-${type.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+                label.appendChild(checkbox); label.appendChild(document.createTextNode(` ${type}`)); label.htmlFor = checkbox.id;
+                checkboxContainer.appendChild(label);
+            });
+        }
+
+        // Renders the clickable list in the *Manage Types* screen
+        function renderManageTypesList() {
+            if (!manageTypesList) return;
+            manageTypesList.innerHTML = ""; // Clear previous
+            if (finalTypes.length === 0) { manageTypesList.innerHTML = "<small>No categories defined.</small>"; return; }
+            const sortedManageTypes = [...finalTypes].sort((a, b) => a.localeCompare(b));
+            sortedManageTypes.forEach(type => {
+                const typeElement = document.createElement('span');
+                typeElement.className = 'type-pill-remove'; // Add class for styling and click handling
+                typeElement.textContent = type;
+                typeElement.dataset.type = type; // Store type name in data attribute for easy access on click
+                // Click listener handled by delegation below
+                manageTypesList.appendChild(typeElement);
+            });
+        }
+
+        // Adds a type to the Set *during configuration*
+        function addTypeToConfig() {
+            if (!configNewTypeInput) return;
+            const newType = configNewTypeInput.value.trim();
+            if (newType && !configTypes.has(newType)) { configTypes.add(newType); renderConfigPreview(); configNewTypeInput.value = ""; }
+            else if (!newType) { alert("Please enter a category name."); }
+            else { alert(`Category "${newType}" already added.`); }
+            configNewTypeInput.focus();
+        }
+
+        // Adds a type to the finalTypes array *from Manage Screen*
+        function addTypeInManageScreen() {
+            if (!manageNewTypeInput) return;
+            const newType = manageNewTypeInput.value.trim();
+            // Check against the current finalTypes array
+            if (newType && !finalTypes.includes(newType)) {
+                 finalTypes.push(newType); // Add to the array
+                 renderManageTypesList(); // Update the list being viewed
+                 manageNewTypeInput.value = "";
+            } else if (!newType) { alert("Please enter a category name."); }
+            else { alert(`Category "${newType}" already exists.`); }
+            manageNewTypeInput.focus();
+        }
+
+        // Removes a type *from Manage Screen* (called via event delegation)
+        function removeType(typeToRemove) {
+             finalTypes = finalTypes.filter(type => type !== typeToRemove);
+             renderManageTypesList(); // Update the list after removal
+        }
+
+
+        // Saves the entire configuration (URL and Initial Types)
+        function saveConfiguration() {
+            if (!scriptUrlInput || !configSection || !mainSection) return;
+            const enteredURL = scriptUrlInput.value.trim();
+            if (!enteredURL || !enteredURL.startsWith('https://script.google.com/macros/s/')) { alert("Invalid Google Apps Script URL format."); scriptUrlInput.focus(); return; }
+            if (configTypes.size === 0) { alert("Please add at least one category before saving."); return; }
+
+            scriptURL = enteredURL;
+            finalTypes = Array.from(configTypes); // Set the final types from config
+
+            localStorage.setItem(SCRIPT_URL_STORAGE_KEY, scriptURL);
+            localStorage.setItem(TYPES_STORAGE_KEY, JSON.stringify(finalTypes));
+
+            renderCheckboxes();
+            configSection.classList.add('hidden');
+            mainSection.classList.remove('hidden');
+            if (messageEl) { messageEl.textContent = ''; messageEl.className = ''; }
+        }
+
+        // --- UI Switching Functions ---
+        function showManageTypesScreen() {
+            if (!manageTypesSection || !mainSection || !configSection) return;
+            renderManageTypesList(); // Populate the list before showing
+            mainSection.classList.add('hidden');
+            configSection.classList.add('hidden');
+            manageTypesSection.classList.remove('hidden');
+            if (manageNewTypeInput) manageNewTypeInput.value = ""; // Clear input when opening
+        }
+
+        function saveTypeChanges() { // Called from Manage Types screen
+             if (!manageTypesSection || !mainSection || !configSection) return;
+             // Save the potentially modified finalTypes array to storage
+             localStorage.setItem(TYPES_STORAGE_KEY, JSON.stringify(finalTypes));
+             // Update the checkboxes on the main screen
+             renderCheckboxes();
+             // Switch back to main screen
+             manageTypesSection.classList.add('hidden');
+             configSection.classList.add('hidden'); // Ensure config stays hidden
+             mainSection.classList.remove('hidden');
+        }
+
+        // --- Reset Function (NO CONFIRMATION) ---
+        function resetApp() {
+            // REMOVED confirm()
+            localStorage.removeItem(SCRIPT_URL_STORAGE_KEY);
+            localStorage.removeItem(TYPES_STORAGE_KEY);
+            scriptURL = null; configTypes.clear(); finalTypes = [];
+            if (amountInput) amountInput.value = ""; if (descriptionInput) descriptionInput.value = "";
+            if (messageEl) { messageEl.textContent = ""; messageEl.className=""; }
+            if (scriptUrlInput) scriptUrlInput.value = ""; if (configNewTypeInput) configNewTypeInput.value = "";
+            if (manageNewTypeInput) manageNewTypeInput.value = "";
+
+            // Show config screen
+            showConfigurationScreen();
+        }
+
+         // Helper function to explicitly show config screen
+        function showConfigurationScreen() {
+             if (!configSection || !mainSection || !manageTypesSection) return;
+             configSection.classList.remove('hidden');
+             mainSection.classList.add('hidden');
+             manageTypesSection.classList.add('hidden');
+             configTypes.clear(); // Ensure config types start fresh
+             renderConfigPreview(); // Show empty preview
+             renderCheckboxes(); // Clear checkboxes in hidden main section
+             renderManageTypesList(); // Clear list in hidden manage section
+        }
+
+        // --- Submit Function (Unchanged logic, just ensure correct elements used) ---
+        async function submitExpense() {
+            if (!amountInput || !descriptionInput || !checkboxContainer || !submitBtn || !messageEl) return;
+            if (!scriptURL) { messageEl.textContent = "Error: App not configured. Please Reset Configuration."; messageEl.className = "error"; return; }
+            const amount = amountInput.value;
+            const description = descriptionInput.value.trim();
+            const selectedTypes = [...checkboxContainer.querySelectorAll("input[type=checkbox]:checked")].map(cb => cb.value);
+            if (!amount || parseFloat(amount) <= 0 || !description || selectedTypes.length === 0) { messageEl.textContent = "Please enter a valid amount, description, and select at least one category."; messageEl.className = "error"; return; }
+            submitBtn.disabled = true; submitBtn.textContent = 'Logging...'; messageEl.textContent = ''; messageEl.className = '';
+            const payload = { amount: parseFloat(amount), description: description, types: selectedTypes };
+            try { /* Fetch and handling logic remains the same */
+                const response = await fetch(scriptURL, { method: "POST", redirect: "follow", headers: { "Content-Type": "text/plain;charset=utf-8", }, body: JSON.stringify(payload) });
+                if (!response.ok) { let eMsg= `Error: ${response.status} ${response.statusText}`; try{const eD=await response.json();eMsg=`Error: ${eD.message||eMsg}`}catch(e){try{const tE=await response.text();if(tE)eMsg+=` - ${tE}`}catch(e2){}} throw new Error(eMsg); }
+                const result = await response.json();
+                if (result.status === "success") { messageEl.textContent = result.message || 'Expense logged successfully!'; messageEl.className = "success"; amountInput.value = ""; descriptionInput.value = ""; checkboxContainer.querySelectorAll("input[type=checkbox]").forEach(cb => cb.checked = false); setTimeout(() => { if (messageEl.className === 'success') messageEl.textContent = ''; }, 5000); }
+                else { throw new Error(result.message || 'An unknown error occurred.'); }
+            } catch (err) { console.error("Submission Error:", err); messageEl.textContent = err.message || "Submission failed."; messageEl.className = "error";
+            } finally { submitBtn.disabled = false; submitBtn.textContent = 'Log Expense'; }
+        } // End of submitExpense
+
+        // --- Initialization on Page Load ---
+        function initializeApp() {
+            // Get ALL DOM element references
+            checkboxContainer = document.getElementById("checkbox-container");
+            amountInput = document.getElementById("amount");
+            descriptionInput = document.getElementById("description");
+            messageEl = document.getElementById("message");
+            submitBtn = document.getElementById("submit-btn");
+            configSection = document.getElementById("config-section");
+            mainSection = document.getElementById("main-section");
+            manageTypesSection = document.getElementById("manage-types-section"); // New section
+            scriptUrlInput = document.getElementById("script-url-input");
+            configNewTypeInput = document.getElementById("config-new-type-input");
+            configTypesPreview = document.getElementById("config-types-preview");
+            manageNewTypeInput = document.getElementById("manage-new-type-input"); // New input
+            manageTypesList = document.getElementById("manage-types-list"); // New list container
+
+            // Try load config from storage
+            const storedURL = localStorage.getItem(SCRIPT_URL_STORAGE_KEY);
+            const storedTypesString = localStorage.getItem(TYPES_STORAGE_KEY);
+
+            // Default to showing config screen
+            let showMain = false;
+
+            if (storedURL && storedTypesString) {
+                try {
+                    finalTypes = JSON.parse(storedTypesString);
+                    if (!Array.isArray(finalTypes)) finalTypes = [];
+                } catch (e) { finalTypes = []; }
+
+                if (finalTypes.length > 0) { // Only show main if URL AND types are valid
+                    scriptURL = storedURL;
+                    showMain = true;
+                }
+            }
+
+            if (showMain) {
+                renderCheckboxes();
+                configSection.classList.add('hidden');
+                manageTypesSection.classList.add('hidden');
+                mainSection.classList.remove('hidden');
+            } else {
+                showConfigurationScreen(); // Show config if not fully set up
+            }
+
+            // Event listener for Enter key in *config* type input
+             if(configNewTypeInput) {
+                configNewTypeInput.addEventListener('keypress', function(event) {
+                    if (event.key === 'Enter') { event.preventDefault(); addTypeToConfig(); } });
+            }
+            // Event listener for Enter key in *manage* type input
+             if(manageNewTypeInput) {
+                manageNewTypeInput.addEventListener('keypress', function(event) {
+                    if (event.key === 'Enter') { event.preventDefault(); addTypeInManageScreen(); } });
+            }
+
+            // Event delegation for removing types in manage screen
+            if(manageTypesList) {
+                manageTypesList.addEventListener('click', function(event) {
+                    // Check if the clicked element is one of our removable pills
+                    if (event.target && event.target.classList.contains('type-pill-remove')) {
+                        const typeToRemove = event.target.dataset.type;
+                        if (typeToRemove) {
+                            removeType(typeToRemove);
+                        }
+                    }
+                });
+            }
+
+            // Event listeners for Enter key in amount/description fields
+            const handleEnterSubmit = (event) => {
+                // Check if Enter key was pressed and the main section is visible
+                if (event.key === 'Enter' && !mainSection.classList.contains('hidden')) {
+                    event.preventDefault(); // Prevent default (like newline in textarea)
+                    // Check if submit button is enabled before triggering
+                    if (submitBtn && !submitBtn.disabled) {
+                        submitExpense();
+                    }
+                }
+            };
+            if (amountInput) { amountInput.addEventListener('keypress', handleEnterSubmit); }
+            if (descriptionInput) { descriptionInput.addEventListener('keypress', handleEnterSubmit); }
+
+        } // End initializeApp
+
+        // Run initialization logic after the DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', initializeApp);
+
+    </script>
+</body>
+</html>
