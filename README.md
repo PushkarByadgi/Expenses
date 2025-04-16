@@ -1,5 +1,7 @@
 Download the Template_Expenses file given, and open it with google sheets.
-Go to extensions(menu bar)=>Apps script=>Deploy=>New deployment=>
+Go to extensions(menu bar)=>Apps script
+Upload the code from code.gs to the script
+then Deploy as New Deployment:
     Description: Anything you like
     Execute as: Me
     Who as acces: Anyone
