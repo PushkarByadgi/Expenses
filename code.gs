@@ -1,78 +1,119 @@
 /**
- * @OnlyCurrentDoc
+ * Handles POST requests from the expense tracker web app, logs data to Google Sheets.
+ * Corrected Version: Ensures 4-digit year in date string and matches the specified column order.
+ *
+ * Instructions:
+ * 1. VERY IMPORTANT: Ensure your Google Sheet tab name exactly matches the SHEET_NAME variable below.
+ * 2. CRITICAL: Ensure your Google Sheet columns are *exactly* in this order:
+ *    Column A: Date (will receive dd/MM/yyyy)
+ *    Column B: Month (will receive full month name)
+ *    Column C: Year (will receive yyyy)
+ *    Column D: Amount (will receive the number)
+ *    Column E: Description (will receive the text)
+ *    Column F: Type (will receive comma-separated types)
+ * 3. Deploy/Re-deploy this script as a Web App (Deploy > Manage deployments > Edit > New version > Deploy):
+ *    - Execute as: Me
+ *    - Who has access: Anyone
+ * 4. Use the resulting Web App URL in your index.html configuration.
+ *
+ * @OnlyCurrentDoc Limits the script to only accessing the spreadsheet it is bound to.
  */
 
 // --- Configuration ---
-var SHEET_NAME = "Expenses"; // <--- MAKE SURE THIS MATCHES YOUR SHEET TAB NAME
+var SHEET_NAME = "Expenses"; // <<< CONFIRM THIS MATCHES YOUR SHEET TAB NAME!
 var SPREADSHEET = SpreadsheetApp.getActiveSpreadsheet();
 var SHEET = SPREADSHEET.getSheetByName(SHEET_NAME);
 
-// --- Main Function (Handles POST requests) ---
+// --- Main Function (Handles POST requests from the web app) ---
 function doPost(e) {
-  var response = { status: "error", message: "Unknown error" };
+  var response = { status: "error", message: "Unknown error during script execution." };
 
   try {
-    if (!SHEET) { /* Keep sheet check */ }
-    if (!e || !e.postData || !e.postData.contents) { /* Keep data check */ }
+    // --- Initial Checks ---
+    if (!SHEET) {
+      Logger.log("Script configuration error: Sheet named '" + SHEET_NAME + "' was not found in spreadsheet '" + SPREADSHEET.getName() + "'.");
+      throw new Error("Configuration Error: Target sheet '" + SHEET_NAME + "' not found.");
+    }
+    if (!e || !e.postData || !e.postData.contents) {
+      throw new Error("No data received in the request.");
+    }
 
+    // --- Parse Incoming Data ---
     var data;
-    try { /* Keep JSON parse */
+    try {
       data = JSON.parse(e.postData.contents);
-    } catch (jsonError) { /* Keep JSON error handling */ }
+    } catch (jsonError) {
+      Logger.log("Failed to parse incoming JSON: " + e.postData.contents + "\nError: " + jsonError);
+      throw new Error("Invalid data format received.");
+    }
 
-    // --- START: SIMPLIFIED VALIDATIONS ---
-    // Validate only the fields received from the client
-    if (!data.amount || typeof data.amount !== 'number' || data.amount <= 0) {
-      throw new Error("Missing or invalid 'amount'. Must be a positive number.");
+    // --- Validate Received Data ---
+    // Ensure all expected fields exist and have roughly the correct type
+    if (data.amount == null || typeof data.amount !== 'number' || data.amount <= 0) {
+        throw new Error("Missing or invalid 'amount'. Must be a positive number.");
     }
     if (!data.description || typeof data.description !== 'string' || data.description.trim() === "") {
-      throw new Error("Missing or invalid 'description'. Must be a non-empty string.");
+        throw new Error("Missing or invalid 'description'. Cannot be empty.");
     }
     if (!data.types || !Array.isArray(data.types) || data.types.length === 0) {
-      throw new Error("Missing or invalid 'types'. Must be a non-empty array.");
+        throw new Error("Missing or invalid 'types'. At least one category must be selected.");
     }
-    // NO validation needed for date/month as they are generated here
-    // --- END: SIMPLIFIED VALIDATIONS ---
 
-    // --- START: GENERATE DATE & MONTH NAME IN SCRIPT ---
+    // --- Generate Date/Time Components ---
     const now = new Date();
-    // Use Utilities.formatDate for robust formatting respecting spreadsheet timezone
-    const formattedDate = Utilities.formatDate(now, Session.getScriptTimeZone(), "dd/MM/yy");
-    const monthName = Utilities.formatDate(now, Session.getScriptTimeZone(), "MMMM"); // "MMMM" gives full month name
-    // --- END: GENERATE DATE & MONTH NAME IN SCRIPT ---
+    const scriptTimeZone = Session.getScriptTimeZone();
+    // Corrected date format to include 4-digit year
+    const formattedDate = Utilities.formatDate(now, scriptTimeZone, "dd/MM/yy"); // Use 'yyyy'
+    const monthName = Utilities.formatDate(now, scriptTimeZone, "MMMM");
+    const year = Utilities.formatDate(now, scriptTimeZone, "yyyy");
 
-
-    // --- MODIFIED ROW DATA ---
-    // Prepare row data using generated date/month and client data
-    // !!! ADJUST THE ORDER TO MATCH YOUR GOOGLE SHEET COLUMNS !!!
+    // --- Prepare Row Data for Sheet ---
+    // IMPORTANT: This order MUST match your Google Sheet columns (A, B, C, D, E, F)
     var rowData = [
-      formattedDate,             // Column 1: Date (DD/MM/YY generated here)
-      monthName,                 // Column 2: Month (Name generated here)
-      data.amount,               // Column 3: Amount (from client)
-      data.description.trim(),   // Column 4: Description (from client)
-      data.types.join(', ')      // Column 5: Types (from client)
+      formattedDate,             // Column A: Date (dd/MM/yyyy)
+      monthName,                 // Column B: Month Name
+      year,                      // Column C: Year (yyyy)
+      data.amount,               // Column D: Amount
+      data.description.trim(),   // Column E: Description
+      data.types.join(', ')      // Column F: Types (comma-separated)
     ];
-    // --- END MODIFIED ROW DATA ---
 
-
-    // --- Keep Logging and Append ---
-    Logger.log("Attempting to append row data: " + JSON.stringify(rowData));
+    // --- Append Data to Sheet ---
+    Logger.log("Attempting to append row data: " + JSON.stringify(rowData) + " to sheet: " + SHEET_NAME);
     SHEET.appendRow(rowData);
     Logger.log("Row appended successfully.");
-    // --- Keep Logging and Append ---
 
-
-    // Set success response (keep as is)
+    // --- Set Success Response ---
     response.status = "success";
     response.message = "Expense logged successfully.";
 
-  } catch (error) { /* Keep error handling */ }
+  } catch (error) {
+    // --- Error Handling ---
+    Logger.log("Error in doPost: " + error.message + "\nStack: " + error.stack);
+    if (e && e.postData && e.postData.contents) { Logger.log("Data received during error: " + e.postData.contents); }
+    response.status = "error";
+    response.message = "Failed to log expense: " + error.message;
+  }
 
-  // Return the response as JSON (keep as is)
+  // --- Return Response ---
   return ContentService
       .createTextOutput(JSON.stringify(response))
       .setMimeType(ContentService.MimeType.JSON);
 }
 
-// --- Test Function (Optional - keep for diagnostics) ---
-// function testSheetAccess() { ... } // No changes needed here
+
+// --- Optional Test Function ---
+function testSheetAccess() {
+  var testSheetName = SHEET_NAME;
+  if (!SPREADSHEET) { Logger.log("Error: Could not get active spreadsheet."); return; }
+  Logger.log("Attempting to access spreadsheet: " + SPREADSHEET.getName() + " (ID: " + SPREADSHEET.getId() + ")");
+  Logger.log("Looking for sheet named: '" + testSheetName + "'");
+  var sheet = SPREADSHEET.getSheetByName(testSheetName);
+  if (sheet) {
+    Logger.log("SUCCESS: Found sheet '" + testSheetName + "'. ID: " + sheet.getSheetId() + ", Index: " + sheet.getIndex() + ", Last Row: " + sheet.getLastRow() + ", Last Col: " + sheet.getLastColumn());
+  } else {
+    Logger.log("FAILURE: Could NOT find sheet named '" + testSheetName + "'.");
+    var allSheets = SPREADSHEET.getSheets(); var sheetNames = allSheets.map(function(s) { return "'" + s.getName() + "'"; });
+    Logger.log("Available sheets: " + sheetNames.join(", "));
+  }
+}
