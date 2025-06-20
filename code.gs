@@ -62,15 +62,18 @@ function doPost(e) {
     // --- Generate Date/Time Components ---
     const now = new Date();
     const scriptTimeZone = Session.getScriptTimeZone();
-    // Corrected date format to include 4-digit year
-    const formattedDate = now; // Insert the Date object directly
+
+    // Format the date to Indian format: dd/MM/yyyy
+    const formattedDate = Utilities.formatDate(now, scriptTimeZone, "dd/MM/yyyy");
     const monthName = Utilities.formatDate(now, scriptTimeZone, "MMMM");
-    const year = Utilities.formatDate(now, scriptTimeZone, "yyyy");
+    //const year = parseInt(Utilities.formatDate(now, scriptTimeZone, "yyyy"));
+    const year = now.getFullYear(); // Returns a number, not a string
+
 
     // --- Prepare Row Data for Sheet ---
     // IMPORTANT: This order MUST match your Google Sheet columns (A, B, C, D, E, F)
     var rowData = [
-      formattedDate,             // Column A: Date (as Date object)
+      formattedDate,             // Column A: Date (formatted as dd/MM/yyyy)
       monthName,                 // Column B: Month Name
       year,                      // Column C: Year (yyyy)
       data.amount,               // Column D: Amount
@@ -81,6 +84,8 @@ function doPost(e) {
     Logger.log("Attempting to insert row data at top: " + JSON.stringify(rowData) + " to sheet: " + SHEET_NAME);
     SHEET.insertRowAfter(1);
     SHEET.getRange(2, 1, 1, rowData.length).setValues([rowData]);
+    SHEET.getRange(2, 3).setNumberFormat("0");
+
     Logger.log("Row inserted successfully at the top.");
 
     // --- Set Success Response ---
