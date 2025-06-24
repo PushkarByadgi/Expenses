@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quick Expense Tracker</title>
     <style>
-        /* Basic Minimal Styling */
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif; padding: 15px; padding-top: 50px; background: #f9f9f9; max-width: 500px; margin: 10px auto; box-sizing: border-box; position: relative; }
         h2, h3 { text-align: center; color: #333; margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; }
@@ -15,72 +14,166 @@
         button:hover:not(:disabled) { background-color: #0056b3; }
         button:active:not(:disabled) { background-color: #004085; }
         button:disabled { background-color: #cccccc; cursor: not-allowed; }
-
         #reset-btn { position: absolute; top: 10px; right: 10px; background-color: #dc3545; color: white; padding: 5px 10px; font-size: 0.8rem; width: auto; cursor: pointer; border: none; border-radius: 4px; }
         #reset-btn:hover { background-color: #c82333; }
-
-        /* General Buttons with smaller widths */
         #manage-types-btn, #save-type-changes-btn { width: auto; padding: 8px 15px; font-size: 0.9rem; margin-top: 10px; display: inline-block; margin-right: 10px;}
-        #manage-types-btn { background-color: #17a2b8; } /* Teal */
+        #manage-types-btn { background-color: #17a2b8; }
         #manage-types-btn:hover { background-color: #138496; }
-        #save-type-changes-btn { background-color: #28a745; } /* Green */
+        #save-type-changes-btn { background-color: #28a745; }
         #save-type-changes-btn:hover { background-color: #218838; }
-
-
         .input-group { margin-bottom: 15px; }
-
-        /* Configuration Section Styling */
         #config-section { padding: 20px; border: 1px solid #ccc; margin-bottom: 20px; background-color: #fff; border-radius: 5px; }
         #save-config-btn { background-color: #28a745; margin-top: 20px; }
         #save-config-btn:hover:not(:disabled) { background-color: #218838; }
-
-        /* Config Type Adding Styling */
         .config-add-type-wrapper { display: flex; align-items: center; margin-bottom: 10px; }
         .config-add-type-wrapper input { flex-grow: 1; margin-bottom: 0; }
         #config-add-type-btn { background-color: #6c757d; width: auto; padding: 8px 15px; display: inline-block; vertical-align: middle; margin-left: 5px; margin-bottom: 0;}
         #config-types-preview { border: 1px dashed #eee; padding: 10px; border-radius: 4px; background: #fafafa; min-height: 50px; margin-top: 15px; font-size: 0.9em; }
         #config-types-preview span { display: inline-block; margin: 3px; padding: 3px 8px; background-color: #e0e0e0; border-radius: 10px; font-size: 0.85em; }
-
-        /* Main Screen Checkbox list styling */
         .checkbox-list { margin-bottom: 15px; border: 1px solid #eee; padding: 10px; border-radius: 4px; background: #fff; min-height: 40px; }
         .checkbox-list label { display: inline-block; margin: 0 10px 10px 0; background-color: #e9e9e9; padding: 5px 10px; border-radius: 15px; cursor: pointer; transition: background-color 0.2s ease; font-weight: normal; }
         .checkbox-list label:has(input:checked) { background-color: #c8e6c9; border: 1px solid #a5d6a7; }
         .checkbox-list input[type="checkbox"] { margin-right: 5px; width: auto; vertical-align: middle; }
-
-        /* Manage Types Section Styling */
         #manage-types-section { padding: 20px; border: 1px solid #ccc; margin-bottom: 20px; background-color: #fff; border-radius: 5px; }
         .manage-add-type-wrapper { display: flex; align-items: center; margin-bottom: 15px; }
         .manage-add-type-wrapper input { flex-grow: 1; margin-bottom: 0; }
         #manage-add-type-btn { background-color: #6c757d; width: auto; padding: 8px 15px; display: inline-block; vertical-align: middle; margin-left: 5px; margin-bottom: 0;}
         #manage-types-list { border: 1px dashed #eee; padding: 10px; border-radius: 4px; background: #fafafa; min-height: 50px; margin-top: 10px; }
-        .type-pill-remove { /* Style for clickable types in manage list */
-             display: inline-block; margin: 4px; padding: 5px 10px; background-color: #ffc107; /* Yellow warning */
-             color: #333; border-radius: 15px; font-size: 0.9em; cursor: pointer;
-             transition: background-color 0.2s ease;
-             position: relative; padding-right: 25px; /* Space for 'x' */
-        }
-         .type-pill-remove::after { /* Add a visual 'x' for removal */
-             content: '✕'; /* Unicode multiplication sign */
-             position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
-             font-weight: bold; color: #dc3545; /* Red 'x' */
-         }
-         .type-pill-remove:hover { background-color: #e0a800; } /* Darker yellow on hover */
-
-
-        /* Status Message */
+        .type-pill-remove { display: inline-block; margin: 4px; padding: 5px 10px; background-color: #ffc107; color: #333; border-radius: 15px; font-size: 0.9em; cursor: pointer; transition: background-color 0.2s ease; position: relative; padding-right: 25px; }
+        .type-pill-remove::after { content: '✕'; position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-weight: bold; color: #dc3545; }
+        .type-pill-remove:hover { background-color: #e0a800; }
         #message { margin-top: 20px; text-align: center; font-weight: bold; font-size: 1rem; }
         .success { color: green; }
         .error { color: red; }
-
-        /* Visibility Control */
         .hidden { display: none; }
-
+        /* Square radio buttons */
+        input[type="radio"].square-radio {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #555;
+            border-radius: 3px;
+            outline: none;
+            margin-right: 8px;
+            vertical-align: middle;
+            background: #fff;
+            transition: border-color 0.2s;
+        }
+        input[type="radio"].square-radio:checked {
+            background: #007bff;
+            border-color: #007bff;
+            position: relative;
+        }
+        input[type="radio"].square-radio:checked::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 7px;
+            height: 14px;
+            border-right: 3px solid #fff;
+            border-bottom: 3px solid #fff;
+            transform: translate(-50%, -55%) rotate(45deg);
+            box-sizing: border-box;
+            pointer-events: none;
+        }
+        /* Last 10 entries link */
+        #last-entries-link {
+            position: fixed;
+            left: 15px;
+            bottom: 15px;
+            background: #fff;
+            color: #007bff;
+            border: 1px solid #007bff;
+            border-radius: 4px;
+            padding: 7px 14px;
+            font-size: 0.95rem;
+            text-decoration: none;
+            cursor: pointer;
+            z-index: 1000;
+            transition: background 0.2s, color 0.2s;
+        }
+        #last-entries-link:hover {
+            background: #007bff;
+            color: #fff;
+        }
+        /* Last 10 entries page */
+        #last-entries-section {
+            background: transparent;
+            border-radius: 0;
+            box-shadow: none;
+            padding: 0;
+            max-width: none;
+            margin: 0;
+        }
+        #last-entries-table {
+            width: 100vw;
+            max-width: 100vw;
+            overflow-x: visible;
+        }
+        #last-entries-section table {
+            width: 100vw;
+            max-width: 100vw;
+            margin: 0;
+            border-collapse: collapse;
+            font-size: 1.08em;
+            background: #fff;
+            table-layout: auto;
+        }
+        #last-entries-section th {
+            background: #3f51b5;
+            color: #fff;
+            font-weight: bold;
+            white-space: nowrap;
+            border: 1px solid #e0e0e0;
+            padding: 12px 8px;
+        }
+        #last-entries-section td {
+            border: 1px solid #e0e0e0;
+            padding: 12px 8px;
+            min-width: 80px;
+            word-break: break-word;
+            vertical-align: top;
+            background: #fff;
+            white-space: pre-line;
+        }
+        #last-entries-section tr:nth-child(even) td {
+            background: #e8eaf6;
+        }
+        #last-entries-section tr:nth-child(odd) td {
+            background: #fff;
+        }
+        #back-to-main-btn {
+            display:block;
+            margin:16px auto 0 auto;
+            background:#007bff;
+            color:#fff;
+            border:none;
+            border-radius:6px;
+            padding:14px 0;
+            font-size:1.1rem;
+            width:95%;
+            max-width:400px;
+            cursor:pointer;
+        }
+        #back-to-main-btn:hover {
+            background: #0056b3;
+        }
+        /* Fullscreen for last entries */
+        body.last-entries-fullscreen, html.last-entries-fullscreen {
+            max-width: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100vw !important;
+            min-height: 100vh !important;
+            background: #f9f9f9 !important;
+            box-sizing: border-box;
+        }
     </style>
 </head>
 <body>
     <button id="reset-btn" onclick="resetApp()">Reset Configuration</button>
-
-    <!-- Configuration Section (URL and Initial Types Setup) -->
+    <!-- Configuration Section -->
     <div id="config-section" class="hidden">
         <h2>Setup Expense Tracker</h2>
         <div class="input-group">
@@ -98,7 +191,6 @@
         </div>
         <button id="save-config-btn" onclick="saveConfiguration()">Save Configuration & Start</button>
     </div>
-
     <!-- Main Expense Entry Section -->
     <div id="main-section" class="hidden">
         <h2>Quick Expense Entry</h2>
@@ -112,14 +204,13 @@
         </div>
         <div class="input-group">
             <label>Categories:</label>
-            <div id="checkbox-container" class="checkbox-list"></div>
+            <div id="radio-container" class="checkbox-list"></div>
         </div>
         <button id="submit-btn" onclick="submitExpense()">Log Expense</button>
-        <button id="manage-types-btn" onclick="showManageTypesScreen()">Manage Types</button> <!-- Button to open manage screen -->
+        <button id="manage-types-btn" onclick="showManageTypesScreen()">Manage Types</button>
         <p id="message"></p>
     </div>
-
-    <!-- Manage Types Section (Add/Remove Existing) -->
+    <!-- Manage Types Section -->
     <div id="manage-types-section" class="hidden">
         <h2>Manage Categories</h2>
          <div class="input-group">
@@ -135,27 +226,58 @@
          </div>
          <button id="save-type-changes-btn" onclick="saveTypeChanges()">Save Changes & Return</button>
     </div>
-
-
+    <!-- Last 10 Entries Section (Page) -->
+    <div id="last-entries-section" class="hidden">
+        <div id="last-entries-table"></div>
+        <button id="back-to-main-btn">Back</button>
+    </div>
+    <!-- Last 10 Entries Link -->
+    <a id="last-entries-link">last 10 entries</a>
     <script>
         // --- Configuration Keys ---
         const SCRIPT_URL_STORAGE_KEY = 'expenseTrackerScriptURL_v6';
         const TYPES_STORAGE_KEY = 'expenseTrackerTypes_v6';
+        const LAST_ENTRIES_CACHE_KEY = 'expenseTrackerLast10Entries_v1';
 
         // --- Global Variables ---
         let scriptURL = null;
-        const configTypes = new Set(); // Temporary types during initial config
-        let finalTypes = []; // The active list of types (Array)
+        const configTypes = new Set();
+        let finalTypes = [];
+        let last10Entries = [];
 
         // --- DOM Element Variables ---
-        let checkboxContainer, amountInput, descriptionInput, messageEl, submitBtn;
-        let configSection, mainSection, manageTypesSection; // UI Sections
-        let scriptUrlInput, configNewTypeInput, configTypesPreview; // Config elements
-        let manageNewTypeInput, manageTypesList; // Manage Types elements
+        let radioContainer, amountInput, descriptionInput, messageEl, submitBtn;
+        let configSection, mainSection, manageTypesSection;
+        let scriptUrlInput, configNewTypeInput, configTypesPreview;
+        let manageNewTypeInput, manageTypesList;
+        let lastEntriesSection, lastEntriesTable, backToMainBtn;
 
-        // --- Functions ---
+        // --- Render Radio Buttons for Categories ---
+        function renderRadioButtons() {
+            if (!radioContainer) return;
+            radioContainer.innerHTML = "";
+            if (finalTypes.length === 0) {
+                radioContainer.innerHTML = "<small>No categories configured. Reset or Manage Types.</small>";
+                return;
+            }
+            const sortedFinalTypes = [...finalTypes].sort((a, b) => a.localeCompare(b));
+            sortedFinalTypes.forEach((type, idx) => {
+                const label = document.createElement("label");
+                const radio = document.createElement("input");
+                radio.type = "radio";
+                radio.className = "square-radio";
+                radio.name = "expense-type";
+                radio.value = type;
+                radio.id = `type-${type.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+                // No default checked
+                label.appendChild(radio);
+                label.appendChild(document.createTextNode(` ${type}`));
+                label.htmlFor = radio.id;
+                radioContainer.appendChild(label);
+            });
+        }
 
-        // Renders the preview list *during configuration*
+        // --- Render Config Preview ---
         function renderConfigPreview() {
             if (!configTypesPreview) return;
             configTypesPreview.innerHTML = "";
@@ -168,38 +290,22 @@
             });
         }
 
-        // Renders the checkboxes on the *main logging screen*
-        function renderCheckboxes() {
-            if (!checkboxContainer) return;
-            checkboxContainer.innerHTML = "";
-            if (finalTypes.length === 0) { checkboxContainer.innerHTML = "<small>No categories configured. Reset or Manage Types.</small>"; return; }
-            const sortedFinalTypes = [...finalTypes].sort((a, b) => a.localeCompare(b));
-            sortedFinalTypes.forEach(type => {
-                const label = document.createElement("label");
-                const checkbox = document.createElement("input");
-                checkbox.type = "checkbox"; checkbox.value = type; checkbox.id = `type-${type.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
-                label.appendChild(checkbox); label.appendChild(document.createTextNode(` ${type}`)); label.htmlFor = checkbox.id;
-                checkboxContainer.appendChild(label);
-            });
-        }
-
-        // Renders the clickable list in the *Manage Types* screen
+        // --- Render Manage Types List ---
         function renderManageTypesList() {
             if (!manageTypesList) return;
-            manageTypesList.innerHTML = ""; // Clear previous
+            manageTypesList.innerHTML = "";
             if (finalTypes.length === 0) { manageTypesList.innerHTML = "<small>No categories defined.</small>"; return; }
             const sortedManageTypes = [...finalTypes].sort((a, b) => a.localeCompare(b));
             sortedManageTypes.forEach(type => {
                 const typeElement = document.createElement('span');
-                typeElement.className = 'type-pill-remove'; // Add class for styling and click handling
+                typeElement.className = 'type-pill-remove';
                 typeElement.textContent = type;
-                typeElement.dataset.type = type; // Store type name in data attribute for easy access on click
-                // Click listener handled by delegation below
+                typeElement.dataset.type = type;
                 manageTypesList.appendChild(typeElement);
             });
         }
 
-        // Adds a type to the Set *during configuration*
+        // --- Add Type to Config ---
         function addTypeToConfig() {
             if (!configNewTypeInput) return;
             const newType = configNewTypeInput.value.trim();
@@ -209,28 +315,26 @@
             configNewTypeInput.focus();
         }
 
-        // Adds a type to the finalTypes array *from Manage Screen*
+        // --- Add Type in Manage Screen ---
         function addTypeInManageScreen() {
             if (!manageNewTypeInput) return;
             const newType = manageNewTypeInput.value.trim();
-            // Check against the current finalTypes array
             if (newType && !finalTypes.includes(newType)) {
-                 finalTypes.push(newType); // Add to the array
-                 renderManageTypesList(); // Update the list being viewed
+                 finalTypes.push(newType);
+                 renderManageTypesList();
                  manageNewTypeInput.value = "";
             } else if (!newType) { alert("Please enter a category name."); }
             else { alert(`Category "${newType}" already exists.`); }
             manageNewTypeInput.focus();
         }
 
-        // Removes a type *from Manage Screen* (called via event delegation)
+        // --- Remove Type ---
         function removeType(typeToRemove) {
              finalTypes = finalTypes.filter(type => type !== typeToRemove);
-             renderManageTypesList(); // Update the list after removal
+             renderManageTypesList();
         }
 
-
-        // Saves the entire configuration (URL and Initial Types)
+        // --- Save Configuration ---
         function saveConfiguration() {
             if (!scriptUrlInput || !configSection || !mainSection) return;
             const enteredURL = scriptUrlInput.value.trim();
@@ -238,108 +342,220 @@
             if (configTypes.size === 0) { alert("Please add at least one category before saving."); return; }
 
             scriptURL = enteredURL;
-            finalTypes = Array.from(configTypes); // Set the final types from config
+            finalTypes = Array.from(configTypes);
 
             localStorage.setItem(SCRIPT_URL_STORAGE_KEY, scriptURL);
             localStorage.setItem(TYPES_STORAGE_KEY, JSON.stringify(finalTypes));
 
-            renderCheckboxes();
+            renderRadioButtons();
             configSection.classList.add('hidden');
             mainSection.classList.remove('hidden');
             if (messageEl) { messageEl.textContent = ''; messageEl.className = ''; }
+            fetchAndCacheLast10Entries();
         }
 
         // --- UI Switching Functions ---
         function showManageTypesScreen() {
             if (!manageTypesSection || !mainSection || !configSection) return;
-            renderManageTypesList(); // Populate the list before showing
+            renderManageTypesList();
             mainSection.classList.add('hidden');
             configSection.classList.add('hidden');
             manageTypesSection.classList.remove('hidden');
-            if (manageNewTypeInput) manageNewTypeInput.value = ""; // Clear input when opening
+            if (manageNewTypeInput) manageNewTypeInput.value = "";
         }
 
-        function saveTypeChanges() { // Called from Manage Types screen
+        function saveTypeChanges() {
              if (!manageTypesSection || !mainSection || !configSection) return;
-             // Save the potentially modified finalTypes array to storage
              localStorage.setItem(TYPES_STORAGE_KEY, JSON.stringify(finalTypes));
-             // Update the checkboxes on the main screen
-             renderCheckboxes();
-             // Switch back to main screen
+             renderRadioButtons();
              manageTypesSection.classList.add('hidden');
-             configSection.classList.add('hidden'); // Ensure config stays hidden
+             configSection.classList.add('hidden');
              mainSection.classList.remove('hidden');
         }
 
-        // --- Reset Function (NO CONFIRMATION) ---
+        // --- Reset Function ---
         function resetApp() {
-            // REMOVED confirm()
             localStorage.removeItem(SCRIPT_URL_STORAGE_KEY);
             localStorage.removeItem(TYPES_STORAGE_KEY);
+            localStorage.removeItem(LAST_ENTRIES_CACHE_KEY);
             scriptURL = null; configTypes.clear(); finalTypes = [];
             if (amountInput) amountInput.value = ""; if (descriptionInput) descriptionInput.value = "";
             if (messageEl) { messageEl.textContent = ""; messageEl.className=""; }
             if (scriptUrlInput) scriptUrlInput.value = ""; if (configNewTypeInput) configNewTypeInput.value = "";
             if (manageNewTypeInput) manageNewTypeInput.value = "";
-
-            // Show config screen
             showConfigurationScreen();
         }
 
-         // Helper function to explicitly show config screen
         function showConfigurationScreen() {
              if (!configSection || !mainSection || !manageTypesSection) return;
              configSection.classList.remove('hidden');
              mainSection.classList.add('hidden');
              manageTypesSection.classList.add('hidden');
-             configTypes.clear(); // Ensure config types start fresh
-             renderConfigPreview(); // Show empty preview
-             renderCheckboxes(); // Clear checkboxes in hidden main section
-             renderManageTypesList(); // Clear list in hidden manage section
+             lastEntriesSection.classList.add('hidden');
+             configTypes.clear();
+             renderConfigPreview();
+             renderRadioButtons();
+             renderManageTypesList();
         }
 
-        // --- Submit Function (Unchanged logic, just ensure correct elements used) ---
+        // --- Submit Function ---
         async function submitExpense() {
-            if (!amountInput || !descriptionInput || !checkboxContainer || !submitBtn || !messageEl) return;
+            if (!amountInput || !descriptionInput || !radioContainer || !submitBtn || !messageEl) return;
             if (!scriptURL) { messageEl.textContent = "Error: App not configured. Please Reset Configuration."; messageEl.className = "error"; return; }
             const amount = amountInput.value;
             const description = descriptionInput.value.trim();
-            const selectedTypes = [...checkboxContainer.querySelectorAll("input[type=checkbox]:checked")].map(cb => cb.value);
-            if (!amount || parseFloat(amount) <= 0 || !description || selectedTypes.length === 0) { messageEl.textContent = "Please enter a valid amount, description, and select at least one category."; messageEl.className = "error"; return; }
+            const selectedRadio = radioContainer.querySelector("input[type=radio]:checked");
+            const selectedType = selectedRadio ? [selectedRadio.value] : [];
+            if (!amount || parseFloat(amount) <= 0 || !description || selectedType.length === 0) {
+                messageEl.textContent = "Please enter a valid amount, description, and select a category.";
+                messageEl.className = "error"; return;
+            }
             submitBtn.disabled = true; submitBtn.textContent = 'Logging...'; messageEl.textContent = ''; messageEl.className = '';
-            const payload = { amount: parseFloat(amount), description: description, types: selectedTypes };
-            try { /* Fetch and handling logic remains the same */
+            const payload = { amount: parseFloat(amount), description: description, types: selectedType };
+            try {
                 const response = await fetch(scriptURL, { method: "POST", redirect: "follow", headers: { "Content-Type": "text/plain;charset=utf-8", }, body: JSON.stringify(payload) });
                 if (!response.ok) { let eMsg= `Error: ${response.status} ${response.statusText}`; try{const eD=await response.json();eMsg=`Error: ${eD.message||eMsg}`}catch(e){try{const tE=await response.text();if(tE)eMsg+=` - ${tE}`}catch(e2){}} throw new Error(eMsg); }
                 const result = await response.json();
-                if (result.status === "success") { messageEl.textContent = result.message || 'Expense logged successfully!'; messageEl.className = "success"; amountInput.value = ""; descriptionInput.value = ""; checkboxContainer.querySelectorAll("input[type=checkbox]").forEach(cb => cb.checked = false); setTimeout(() => { if (messageEl.className === 'success') messageEl.textContent = ''; }, 5000); }
+                if (result.status === "success") {
+                    messageEl.textContent = result.message || 'Expense logged successfully!';
+                    messageEl.className = "success";
+                    amountInput.value = ""; descriptionInput.value = "";
+                    radioContainer.querySelectorAll("input[type=radio]").forEach(rb => rb.checked = false);
+                    setTimeout(() => { if (messageEl.className === 'success') messageEl.textContent = ''; }, 5000);
+                    await fetchAndCacheLast10Entries();
+                }
                 else { throw new Error(result.message || 'An unknown error occurred.'); }
-            } catch (err) { console.error("Submission Error:", err); messageEl.textContent = err.message || "Submission failed."; messageEl.className = "error";
-            } finally { submitBtn.disabled = false; submitBtn.textContent = 'Log Expense'; }
-        } // End of submitExpense
+            } catch (err) {
+                console.error("Submission Error:", err);
+                messageEl.textContent = err.message || "Submission failed.";
+                messageEl.className = "error";
+            } finally {
+                submitBtn.disabled = false; submitBtn.textContent = 'Log Expense';
+            }
+        }
+
+        // --- Fetch and Cache Last 10 Entries ---
+        async function fetchAndCacheLast10Entries() {
+            if (!scriptURL) return;
+            try {
+                let url = scriptURL;
+                if (!url.endsWith("?")) url += "?";
+                const resp = await fetch(url, { method: "GET" });
+                const data = await resp.json();
+                if (data.status === "success" && Array.isArray(data.entries)) {
+                    last10Entries = data.entries;
+                    localStorage.setItem(LAST_ENTRIES_CACHE_KEY, JSON.stringify(last10Entries));
+                }
+            } catch (e) {}
+        }
+
+        // --- Escape HTML for Table Cells ---
+        function escapeHtml(text) {
+            if (!text && text !== 0) return '';
+            return String(text)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // --- Fullscreen Body Class for Last Entries ---
+        function setLastEntriesFullscreen(on) {
+            if (on) {
+                document.body.classList.add('last-entries-fullscreen');
+                document.documentElement.classList.add('last-entries-fullscreen');
+            } else {
+                document.body.classList.remove('last-entries-fullscreen');
+                document.documentElement.classList.remove('last-entries-fullscreen');
+            }
+        }
+
+        // --- Show Last 10 Entries Page ---
+        function showLastEntriesPage() {
+            if (!lastEntriesSection || !lastEntriesTable) return;
+            if (mainSection) mainSection.classList.add('hidden');
+            if (configSection) configSection.classList.add('hidden');
+            if (manageTypesSection) manageTypesSection.classList.add('hidden');
+            lastEntriesSection.classList.remove('hidden');
+            setLastEntriesFullscreen(true); // Enable fullscreen
+            const resetBtn = document.getElementById("reset-btn");
+            if (resetBtn) resetBtn.style.visibility = "hidden";
+            let entries = [];
+            try {
+                const cached = localStorage.getItem(LAST_ENTRIES_CACHE_KEY);
+                if (cached) entries = JSON.parse(cached);
+            } catch (e) {}
+            let html = "";
+            if (!entries || entries.length === 0) {
+                html = "<p style='text-align:center;'>No entries found.</p>";
+            } else {
+                html = `<table>
+                    <thead>
+                        <tr>
+                            <th style="width: 90px;">Date</th>
+                            <th style="width: 80px;">Month</th>
+                            <th style="width: 60px;">Year</th>
+                            <th style="width: 80px;">Amount</th>
+                            <th style="width: 180px;">Description</th>
+                            <th style="width: 120px;">Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+                entries.forEach(row => {
+                    html += "<tr>";
+                    row.forEach(cell => {
+                        html += "<td>" + escapeHtml(cell) + "</td>";
+                    });
+                    html += "</tr>";
+                });
+                html += "</tbody></table>";
+            }
+            lastEntriesTable.innerHTML = html;
+        }
+        function backToMainFromEntries() {
+            if (lastEntriesSection) lastEntriesSection.classList.add('hidden');
+            if (mainSection) mainSection.classList.remove('hidden');
+            setLastEntriesFullscreen(false);
+            const resetBtn = document.getElementById("reset-btn");
+            if (resetBtn) resetBtn.style.visibility = ""; // Disable fullscreen
+        }
 
         // --- Initialization on Page Load ---
         function initializeApp() {
-            // Get ALL DOM element references
-            checkboxContainer = document.getElementById("checkbox-container");
+            radioContainer = document.getElementById("radio-container");
             amountInput = document.getElementById("amount");
             descriptionInput = document.getElementById("description");
             messageEl = document.getElementById("message");
             submitBtn = document.getElementById("submit-btn");
             configSection = document.getElementById("config-section");
             mainSection = document.getElementById("main-section");
-            manageTypesSection = document.getElementById("manage-types-section"); // New section
+            manageTypesSection = document.getElementById("manage-types-section");
             scriptUrlInput = document.getElementById("script-url-input");
             configNewTypeInput = document.getElementById("config-new-type-input");
             configTypesPreview = document.getElementById("config-types-preview");
-            manageNewTypeInput = document.getElementById("manage-new-type-input"); // New input
-            manageTypesList = document.getElementById("manage-types-list"); // New list container
+            manageNewTypeInput = document.getElementById("manage-new-type-input");
+            manageTypesList = document.getElementById("manage-types-list");
+            lastEntriesSection = document.getElementById("last-entries-section");
+            lastEntriesTable = document.getElementById("last-entries-table");
+            backToMainBtn = document.getElementById("back-to-main-btn");
 
-            // Try load config from storage
+            const lastEntriesLink = document.getElementById("last-entries-link");
+            if (lastEntriesLink) {
+                lastEntriesLink.onclick = function(e) {
+                    e.preventDefault();
+                    showLastEntriesPage();
+                };
+            }
+            if (backToMainBtn) {
+                backToMainBtn.onclick = function() {
+                    backToMainFromEntries();
+                };
+            }
+
             const storedURL = localStorage.getItem(SCRIPT_URL_STORAGE_KEY);
             const storedTypesString = localStorage.getItem(TYPES_STORAGE_KEY);
 
-            // Default to showing config screen
             let showMain = false;
 
             if (storedURL && storedTypesString) {
@@ -348,36 +564,33 @@
                     if (!Array.isArray(finalTypes)) finalTypes = [];
                 } catch (e) { finalTypes = []; }
 
-                if (finalTypes.length > 0) { // Only show main if URL AND types are valid
+                if (finalTypes.length > 0) {
                     scriptURL = storedURL;
                     showMain = true;
                 }
             }
 
             if (showMain) {
-                renderCheckboxes();
+                renderRadioButtons();
                 configSection.classList.add('hidden');
                 manageTypesSection.classList.add('hidden');
+                lastEntriesSection.classList.add('hidden');
                 mainSection.classList.remove('hidden');
+                fetchAndCacheLast10Entries();
             } else {
-                showConfigurationScreen(); // Show config if not fully set up
+                showConfigurationScreen();
             }
 
-            // Event listener for Enter key in *config* type input
-             if(configNewTypeInput) {
+            if(configNewTypeInput) {
                 configNewTypeInput.addEventListener('keypress', function(event) {
                     if (event.key === 'Enter') { event.preventDefault(); addTypeToConfig(); } });
             }
-            // Event listener for Enter key in *manage* type input
-             if(manageNewTypeInput) {
+            if(manageNewTypeInput) {
                 manageNewTypeInput.addEventListener('keypress', function(event) {
                     if (event.key === 'Enter') { event.preventDefault(); addTypeInManageScreen(); } });
             }
-
-            // Event delegation for removing types in manage screen
             if(manageTypesList) {
                 manageTypesList.addEventListener('click', function(event) {
-                    // Check if the clicked element is one of our removable pills
                     if (event.target && event.target.classList.contains('type-pill-remove')) {
                         const typeToRemove = event.target.dataset.type;
                         if (typeToRemove) {
@@ -386,13 +599,9 @@
                     }
                 });
             }
-
-            // Event listeners for Enter key in amount/description fields
             const handleEnterSubmit = (event) => {
-                // Check if Enter key was pressed and the main section is visible
                 if (event.key === 'Enter' && !mainSection.classList.contains('hidden')) {
-                    event.preventDefault(); // Prevent default (like newline in textarea)
-                    // Check if submit button is enabled before triggering
+                    event.preventDefault();
                     if (submitBtn && !submitBtn.disabled) {
                         submitExpense();
                     }
@@ -400,12 +609,9 @@
             };
             if (amountInput) { amountInput.addEventListener('keypress', handleEnterSubmit); }
             if (descriptionInput) { descriptionInput.addEventListener('keypress', handleEnterSubmit); }
+        }
 
-        } // End initializeApp
-
-        // Run initialization logic after the DOM is fully loaded
         document.addEventListener('DOMContentLoaded', initializeApp);
-
     </script>
 </body>
 </html>
